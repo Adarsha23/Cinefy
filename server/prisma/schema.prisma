@@ -1,16 +1,68 @@
+// /server/prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
+
 model User {
-    id        Int      @id @default(autoincrement())
-    name      String
-    email     String   @unique
-    password  String
-    role      String   @default("CUSTOMER")
-    createdAt DateTime @default(now())
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  role      String    @default("CUSTOMER") // CUSTOMER or ADMIN
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+}
+
+model Movie {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  duration    Int      // in minutes
+  genre       String
+  posterUrl   String
+  releaseDate DateTime
+  shows       Show[]   // multiple showtimes
+}
+
+model Theater {
+  id          Int      @id @default(autoincrement())
+  name        String
+  location    String
+  totalHalls  Int
+  shows       Show[]
+}
+
+model Show {
+  id           Int       @id @default(autoincrement())
+  startTime    DateTime
+  ticketPrice  Float
+  
+  // Relations
+  movieId      Int
+  movie        Movie     @relation(fields: [movieId], references: [id])
+  theaterId    Int
+  theater      Theater   @relation(fields: [theaterId], references: [id])
+  
+  bookings     Booking[] // This show has many bookings
+}
+
+model Booking {
+  id          Int      @id @default(autoincrement())
+  seats       String[] 
+  totalPrice  Float
+  status      String   @default("CONFIRMED")
+  
+  // Relations
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  showId      Int
+  show        Show     @relation(fields: [showId], references: [id])
+  
+  createdAt   DateTime @default(now())
 }

@@ -9,11 +9,14 @@ dotenv.config();
 // Initialize the Express app
 const app = express();
 
-// Middleware (Think of these as "filters" the request passes through)
-app.use(cors()); // Allows frontend to talk to this server
-app.use(express.json()); // Allows the server to understand JSON data sent in requests
+app.use(cors()); // Allow frontend to talk to this server
+app.use(express.json()); // Allow the server to understand JSON data sent in requests
 
-// Create a "Health Check" route
+// Import our Auth Routes
+const authRoutes = require('./routes/authRoutes');
+// Mount them on the '/api/auth' path
+app.use('/api/auth', authRoutes);
+
 //test if the server is alive.
 app.get('/api/health', (req, res) => {
   res.json({ 

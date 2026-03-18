@@ -65,12 +65,12 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // 3. Create the JWT VIP Pass!
+    // 3. Create the JWT
     // We put their 'id' and 'role' inside the token so we know who they are later
     const token = jwt.sign(
       { userId: user.id, role: user.role },
-      process.env.JWT_SECRET, // The secret key we made in .env
-      { expiresIn: '1d' }     // Token expires in 1 day
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
     );
 
     // 4. Send the token back to the frontend

@@ -13,7 +13,7 @@ export default function Register() {
     e.preventDefault();
     try {
       await api.post('/auth/register', form);
-      alert("Registration successful! 🍿");
+      alert("Registration successful!");
       router.push('/login');
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed");

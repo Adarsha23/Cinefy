@@ -35,4 +35,24 @@ const createMovie = async (req, res) => {
   }
 };
 
-module.exports = { getMovies, createMovie };
+
+// 3. Get a single movie by ID
+const getMovieById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const movie = await prisma.movie.findUnique({
+      where: { id: parseInt(id) }
+    });
+    
+    if (!movie) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
+    
+    res.json(movie);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching movie details" });
+  }
+};
+
+module.exports = { getMovies, createMovie, getMovieById };
+

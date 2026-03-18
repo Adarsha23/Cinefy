@@ -43,6 +43,9 @@ async function seedFromTMDB() {
 
     const genre = detail.genres?.map(g => g.name).join('/') || 'General';
     const posterUrl = `https://image.tmdb.org/t/p/w500${detail.poster_path}`;
+    const backdropUrl = detail.backdrop_path
+      ? `https://image.tmdb.org/t/p/w1280${detail.backdrop_path}` // Wide 16:9 image for hero
+      : posterUrl;
 
     await prisma.movie.create({
       data: {
@@ -51,6 +54,7 @@ async function seedFromTMDB() {
         duration: detail.runtime || 120,
         genre: genre,
         posterUrl: posterUrl,
+        backdropUrl: backdropUrl,
         releaseDate: new Date(detail.release_date),
       },
     });

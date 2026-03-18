@@ -26,6 +26,7 @@ model Movie {
   duration    Int      // in minutes
   genre       String
   posterUrl   String
+  backdropUrl String   @default("")
   releaseDate DateTime
   shows       Show[]   // multiple showtimes
 }

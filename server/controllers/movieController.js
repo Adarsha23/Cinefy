@@ -54,5 +54,24 @@ const getMovieById = async (req, res) => {
   }
 };
 
-module.exports = { getMovies, createMovie, getMovieById };
+// 4. Get all showtimes for a specific movie
+const getMovieShows = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const shows = await prisma.show.findMany({
+      where: { movieId: parseInt(id) },
+      include: { 
+        theater: true // Include theater name and location!
+      },
+      orderBy: { startTime: 'asc' }
+    });
+    res.json(shows);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching showtimes" });
+  }
+};
+
+// Update exports
+module.exports = { getMovies, createMovie, getMovieById, getMovieShows };
+
 

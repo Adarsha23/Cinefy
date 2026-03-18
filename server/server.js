@@ -24,6 +24,9 @@ app.get('/api/health', (req, res) => {
     message: 'Cinefy Backend is running!' 
   });
 });
+const movieRoutes = require('./routes/movieRoutes');
+app.use('/api/movies', movieRoutes);
+
 
 // Define the Port and Start the server
 const PORT = process.env.PORT || 5000;

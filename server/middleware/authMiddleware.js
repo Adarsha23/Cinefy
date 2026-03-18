@@ -8,7 +8,7 @@ const protect = (req, res, next) => {
   // 1. Check if they sent a token in the headers
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
-      // 2. The header format is "Bearer <token>", so we split by space and grab the 2nd part
+      // 2. The header format is in two parts, token in second, so we split by space and grab the 2nd part
       token = req.headers.authorization.split(' ')[1];
 
       // 3. Verify the token using our secret key

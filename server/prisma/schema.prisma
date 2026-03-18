@@ -49,7 +49,7 @@ model Show {
   theaterId    Int
   theater      Theater   @relation(fields: [theaterId], references: [id])
   
-  bookings     Booking[] // This show has many bookings
+  bookings     Booking[] 
 }
 
 model Booking {

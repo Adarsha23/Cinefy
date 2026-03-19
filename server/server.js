@@ -25,7 +25,9 @@ app.get('/api/health', (req, res) => {
   });
 });
 const movieRoutes = require('./routes/movieRoutes');
+const bookingRoutes = require('./routes/bookingRoutes'); // 👈 Add this
 app.use('/api/movies', movieRoutes);
+app.use('/api/bookings', bookingRoutes); // 👈 Connect it!
 
 
 // Define the Port and Start the server

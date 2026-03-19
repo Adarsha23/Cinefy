@@ -71,7 +71,25 @@ const getMovieShows = async (req, res) => {
   }
 };
 
+// 5. Get details for a specific SHOW (for the booking page)
+const getShowById = async (req, res) => {
+  try {
+    const { showId } = req.params;
+    const show = await prisma.show.findUnique({
+      where: { id: parseInt(showId) },
+      include: { 
+        movie: true,   // Show the title/poster
+        theater: true, // Show the theater name/location
+        bookings: true //  Include all bookings for this show
+      }
+    });
+    res.json(show);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching show details" });
+  }
+};
+
 // Update exports
-module.exports = { getMovies, createMovie, getMovieById, getMovieShows };
+module.exports = { getMovies, createMovie, getMovieById, getMovieShows, getShowById };
 
 

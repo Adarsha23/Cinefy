@@ -68,7 +68,7 @@ const loginUser = async (req, res) => {
     // 3. Create the JWT
     // We put their 'id' and 'role' inside the token so we know who they are later
     const token = jwt.sign(
-      { userId: user.id, role: user.role },
+      { id: user.id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );

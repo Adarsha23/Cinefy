@@ -31,4 +31,13 @@ const protect = (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+// 🏛️ ADMIN ONLY MIDDLEWARE
+const adminOnly = (req, res, next) => {
+  if (req.user && req.user.role === 'ADMIN') {
+    next();
+  } else {
+    res.status(403).json({ message: "Forbidden - Admin access required" });
+  }
+};
+
+module.exports = { protect, adminOnly };

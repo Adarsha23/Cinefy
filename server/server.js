@@ -25,9 +25,11 @@ app.get('/api/health', (req, res) => {
   });
 });
 const movieRoutes = require('./routes/movieRoutes');
-const bookingRoutes = require('./routes/bookingRoutes'); // 👈 Add this
+const bookingRoutes = require('./routes/bookingRoutes');
+const adminRoutes = require('./routes/adminRoutes'); // 🏰 Add this
 app.use('/api/movies', movieRoutes);
-app.use('/api/bookings', bookingRoutes); // 👈 Connect it!
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/admin', adminRoutes); // 🏰 Add this
 
 
 // Define the Port and Start the server

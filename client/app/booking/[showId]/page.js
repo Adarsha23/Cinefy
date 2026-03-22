@@ -26,7 +26,7 @@ export default function BookingPage() {
         }, []);
         setBookedSeats(taken);
       } catch (err) {
-        console.error(err);
+        console.error("Show Detail Fetch Error:", err.message);
       } finally {
         setLoading(false);
       }
@@ -34,19 +34,19 @@ export default function BookingPage() {
     fetchShowDetails();
   }, [showId]);
 
-  // DYNAMIC PRICE HELPER
-  const getPriceByDate = (dateString) => {
+  // Pricing logic for ticket calculation
+  const getTicketPrice = (dateString) => {
     const d = new Date(dateString);
     const day = d.getDay(); 
-    if (day === 2 || day === 3) return 200; // Tue, Wed
-    if (day === 1 || day === 4) return 350; // Mon, Thu
-    return 400; // Fri, Sat, Sun
+    if (day === 2 || day === 3) return 200; 
+    if (day === 1 || day === 4) return 350; 
+    return 400; 
   };
 
-  const currentPrice = show ? getPriceByDate(show.startTime) : 0;
+  const currentPrice = show ? getTicketPrice(show.startTime) : 0;
   const totalPrice = selectedSeats.length * currentPrice;
 
-  const toggleSeat = (seatId) => {
+  const toggleSeatSelection = (seatId) => {
     if (bookedSeats.includes(seatId)) return;
     setSelectedSeats(prev => 
       prev.includes(seatId) 
@@ -55,44 +55,44 @@ export default function BookingPage() {
     );
   };
 
-  const handleBooking = async () => {
+  const handleBookingConfirm = async () => {
     try {
-      if (selectedSeats.length === 0) return alert("Select at least one seat!");
+      if (selectedSeats.length === 0) return alert("Please select at least one seat.");
       
       await api.post('/bookings', {
         showId: parseInt(showId),
         seats: selectedSeats,
-        totalPrice: totalPrice // 👈 Using corrected dynamic price
+        totalPrice: totalPrice 
       });
 
-      alert("Booking Successful! 🍿");
+      alert("Booking confirmed successfully.");
       router.push('/bookings');
     } catch (err) {
-      alert("Booking failed. Please login first! 🔐");
+      alert("Authentication required for booking.");
     }
   };
 
-  if (loading) return <div style={{ color: 'white', padding: '100px', textAlign: 'center' }}>Loading theater...</div>;
-  if (!show) return <div style={{ color: 'white', padding: '100px', textAlign: 'center' }}>Show not found</div>;
+  if (loading) return <div style={{ color: '#444', padding: '10rem', textAlign: 'center', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '2px' }}>Loading Theater Configuration...</div>;
+  if (!show) return <div style={{ color: '#e50914', padding: '10rem', textAlign: 'center' }}>Selected show not found.</div>;
 
   return (
-    <div style={{ backgroundColor: '#0a0a0a', color: '#fff', minHeight: '100vh', padding: '100px 2rem 150px 2rem' }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+    <div style={{ backgroundColor: '#050505', color: '#fff', minHeight: '100vh', padding: '100px 2rem 150px 2rem' }}>
+      <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
         
-        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem' }}>{show.movie.title}</h2>
-        <p style={{ color: '#e50914', fontWeight: 'bold', marginBottom: '3rem', letterSpacing: '1px' }}>
+        <h2 style={{ fontSize: '2.5rem', fontWeight: '950', marginBottom: '0.5rem' }}>{show.movie.title}</h2>
+        <p style={{ color: '#e50914', fontWeight: 'bold', marginBottom: '4rem', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.9rem' }}>
           {show.theater.name} • {new Date(show.startTime).toLocaleString([], { weekday: 'long', hour: '2-digit', minute: '2-digit' })}
         </p>
 
-        {/* The Screen */}
-        <div style={{ width: '100%', height: '4px', background: '#333', borderRadius: '50px', marginBottom: '1rem', boxShadow: '0 10px 30px rgba(255,255,255,0.1)' }} />
-        <p style={{ color: '#444', fontSize: '0.7rem', letterSpacing: '4px', marginBottom: '4rem' }}>SCREEN THIS WAY</p>
+        {/* Cinematic Screen Indicator */}
+        <div style={{ width: '100%', height: '2px', background: 'linear-gradient(to right, transparent, #333, transparent)', marginBottom: '1rem' }} />
+        <p style={{ color: '#222', fontSize: '0.7rem', letterSpacing: '8px', marginBottom: '5rem', fontWeight: 'bold' }}>THEATER SCREEN</p>
 
-        {/* Seat Grid */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center', marginBottom: '4rem' }}>
+        {/* Interactive Seating Layout */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center', marginBottom: '5rem' }}>
           {rows.map(row => (
-            <div key={row} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <span style={{ width: '25px', fontSize: '0.8rem', color: '#444', fontWeight: 'bold' }}>{row}</span>
+            <div key={row} style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+              <span style={{ width: '30px', fontSize: '0.8rem', color: '#222', fontWeight: 'bold' }}>{row}</span>
               {cols.map(col => {
                 const seatId = `${row}${col}`;
                 const isSelected = selectedSeats.includes(seatId);
@@ -101,16 +101,15 @@ export default function BookingPage() {
                 return (
                   <div 
                     key={seatId} 
-                    onClick={() => toggleSeat(seatId)}
+                    onClick={() => toggleSeatSelection(seatId)}
                     style={{
-                      width: '32px', height: '32px', borderRadius: '6px',
+                      width: '34px', height: '34px', borderRadius: '4px',
                       cursor: isBooked ? 'not-allowed' : 'pointer',
                       transition: '0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '0.7rem', fontWeight: 'bold',
-                      backgroundColor: isBooked ? '#222' : isSelected ? '#e50914' : 'rgba(255,255,255,0.05)',
-                      color: isBooked ? '#444' : isSelected ? '#fff' : '#666',
+                      fontSize: '0.75rem', fontWeight: 'bold',
+                      backgroundColor: isBooked ? '#111' : isSelected ? '#e50914' : 'transparent',
+                      color: isBooked ? '#333' : isSelected ? '#fff' : '#666',
                       border: isSelected ? '1px solid #e50914' : '1px solid #222',
-                      boxShadow: isSelected ? '0 0 15px rgba(229,9,20,0.4)' : 'none'
                     }}
                   >
                     {!isBooked && col}
@@ -121,29 +120,28 @@ export default function BookingPage() {
           ))}
         </div>
 
-        {/* Summary Footer */}
+        {/* Global Checkout Bar */}
         {selectedSeats.length > 0 && (
           <div style={{ 
             position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
-            width: '90%', maxWidth: '800px', backgroundColor: '#111', border: '1px solid #222',
-            padding: '1.5rem 3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            borderRadius: '100px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', zIndex: 1000
+            width: '90%', maxWidth: '1000px', backgroundColor: '#0d0d0d', border: '1px solid #1a1a1a',
+            padding: '1.5rem 4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            borderRadius: '4px', boxShadow: '0 20px 50px rgba(0,0,0,0.8)', zIndex: 1000
           }}>
             <div style={{ textAlign: 'left' }}>
-              <p style={{ margin: 0, color: '#888', fontSize: '0.9rem' }}>{selectedSeats.length} Seats: {selectedSeats.join(', ')}</p>
-              <h3 style={{ margin: 0, color: '#fff', fontSize: '1.5rem', fontWeight: '900' }}>Total: NPR {totalPrice}</h3>
+              <p style={{ margin: 0, color: '#555', fontSize: '0.85rem', fontWeight: 'bold' }}>{selectedSeats.length} SEATS SELECTED</p>
+              <h3 style={{ margin: 0, color: '#fff', fontSize: '1.6rem', fontWeight: '950' }}>Total NPR {totalPrice}</h3>
             </div>
             <button 
-              onClick={handleBooking}
+              onClick={handleBookingConfirm}
               style={{
                 backgroundColor: '#e50914', color: 'white', border: 'none',
-                padding: '1.2rem 3.5rem', borderRadius: '50px', fontWeight: '900', 
-                fontSize: '1.1rem', cursor: 'pointer', transition: '0.3s'
+                padding: '1.2rem 4.5rem', borderRadius: '4px', fontWeight: '900', 
+                fontSize: '1rem', cursor: 'pointer', transition: '0.2s', 
+                textTransform: 'uppercase', letterSpacing: '1px'
               }}
-              onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
-              onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
             >
-              Confirm NPR {totalPrice} →
+              Verify Reservation
             </button>
           </div>
         )}

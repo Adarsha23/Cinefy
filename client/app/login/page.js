@@ -1,28 +1,24 @@
-// client/app/login/page.js
 'use client';
 import { useState } from 'react';
 import api from '@/lib/axios';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../context/AuthContext'; // 👈 Use our hook
+import { useAuth } from '../context/AuthContext';
 import Link from 'next/link';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth(); // 👈 Pull login function
+  const { login } = useAuth();
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const response = await api.post('/auth/login', { email, password });
-      
-      // Use the global login function (this updates navigation instantly!)
-      login(response.data.token); 
-      
+      login(response.data.token, response.data.user); 
       router.push('/');
     } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
+      alert(err.response?.data?.message || "Authentication failed");
     }
   };
 
@@ -32,32 +28,30 @@ export default function Login() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500") center/cover',
+      background: '#050505',
       paddingTop: '80px'
     }}>
       <div style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        backgroundColor: '#0d0d0d',
         padding: '3.5rem',
-        borderRadius: '12px',
+        borderRadius: '4px',
         width: '100%',
         maxWidth: '450px',
-        boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255,255,255,0.1)'
+        border: '1px solid #1a1a1a'
       }}>
-        <h1 style={{ marginBottom: '2.5rem', fontSize: '2.5rem', textAlign: 'center', fontWeight: '900' }}>Sign In</h1>
+        <h1 style={{ marginBottom: '2.5rem', fontSize: '2.2rem', textAlign: 'center', fontWeight: 'bold' }}>Sign In</h1>
         
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1.5rem' }}>
+        <form onSubmit={handleLogin}>
+          <div style={{ marginBottom: '1.2rem' }}>
             <input 
               type="email" 
-              placeholder="Email or phone number" 
+              placeholder="Email address" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               style={{
-                width: '100%', padding: '1rem', borderRadius: '6px',
-                border: 'none', backgroundColor: '#333', color: 'white', fontSize: '1rem',
+                width: '100%', padding: '1rem', borderRadius: '4px',
+                border: '1px solid #222', backgroundColor: '#151515', color: 'white', fontSize: '1rem',
                 outline: 'none', boxSizing: 'border-box'
               }}
             />
@@ -70,27 +64,24 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               required
               style={{
-                width: '100%', padding: '1rem', borderRadius: '6px',
-                border: 'none', backgroundColor: '#333', color: 'white', fontSize: '1rem',
+                width: '100%', padding: '1rem', borderRadius: '4px',
+                border: '1px solid #222', backgroundColor: '#151515', color: 'white', fontSize: '1rem',
                 outline: 'none', boxSizing: 'border-box'
               }}
             />
           </div>
           <button style={{
-            width: '100%', padding: '1.2rem', borderRadius: '6px', border: 'none',
-            backgroundColor: '#e50914', color: 'white', fontWeight: '900', fontSize: '1.1rem',
-            cursor: 'pointer', transition: '0.3s', boxShadow: '0 10px 20px rgba(229,9,20,0.3)'
-          }}
-          onMouseOver={(e) => e.target.style.backgroundColor = '#f40612'}
-          onMouseOut={(e) => e.target.style.backgroundColor = '#e50914'}
-          >
-            Sign In
+            width: '100%', padding: '1rem', borderRadius: '4px', border: 'none',
+            backgroundColor: '#e50914', color: 'white', fontWeight: 'bold', fontSize: '1rem',
+            cursor: 'pointer', transition: '0.2s', textTransform: 'uppercase', letterSpacing: '1px'
+          }}>
+            Login
           </button>
         </form>
 
-        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-          <p style={{ color: '#737373', fontSize: '1rem' }}>
-            New to Cinefy? <Link href="/register" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}>Sign up now.</Link>
+        <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
+          <p style={{ color: '#666', fontSize: '0.9rem' }}>
+            New to Cinefy? <Link href="/register" style={{ color: '#fff', textDecoration: 'none', fontWeight: 'bold' }}>Create an account.</Link>
           </p>
         </div>
       </div>

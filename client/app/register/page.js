@@ -1,5 +1,4 @@
-// client/app/register/page.js
-'use client'; // This tells Next.js this is an interactive component
+'use client';
 import { useState } from 'react';
 import api from '@/lib/axios';
 import { useRouter } from 'next/navigation';
@@ -9,11 +8,11 @@ export default function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     try {
       await api.post('/auth/register', form);
-      alert("Registration successful!");
+      alert("Registration successful");
       router.push('/login');
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed");
@@ -22,34 +21,34 @@ export default function Register() {
 
   return (
     <div style={{
-      height: '90vh',
+      height: '100vh',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url("https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=500") center/cover'
+      background: '#050505',
+      paddingTop: '80px'
     }}>
       <div style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        padding: '3rem',
-        borderRadius: '12px',
+        backgroundColor: '#0d0d0d',
+        padding: '3.5rem',
+        borderRadius: '4px',
         width: '100%',
         maxWidth: '450px',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid #333'
+        border: '1px solid #1a1a1a'
       }}>
-        <h1 style={{ marginBottom: '2rem', fontSize: '2.2rem', textAlign: 'center' }}>Join Cinefy</h1>
+        <h1 style={{ marginBottom: '2rem', fontSize: '2.2rem', textAlign: 'center', fontWeight: 'bold' }}>Create Account</h1>
         
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleRegister}>
           <input 
             type="text" 
             placeholder="Full Name" 
             value={form.name}
             onChange={(e) => setForm({...form, name: e.target.value})}
             style={{
-              width: '100%', padding: '1rem', marginBottom: '1.2rem', borderRadius: '6px',
-              border: 'none', backgroundColor: '#333', color: 'white', fontSize: '1rem'
+              width: '100%', padding: '1rem', marginBottom: '1.2rem', borderRadius: '4px',
+              border: '1px solid #222', backgroundColor: '#151515', color: 'white', fontSize: '1rem', outline: 'none'
             }}
+            required
           />
           <input 
             type="email" 
@@ -57,9 +56,10 @@ export default function Register() {
             value={form.email}
             onChange={(e) => setForm({...form, email: e.target.value})}
             style={{
-              width: '100%', padding: '1rem', marginBottom: '1.2rem', borderRadius: '6px',
-              border: 'none', backgroundColor: '#333', color: 'white', fontSize: '1rem'
+              width: '100%', padding: '1rem', marginBottom: '1.2rem', borderRadius: '4px',
+              border: '1px solid #222', backgroundColor: '#151515', color: 'white', fontSize: '1rem', outline: 'none'
             }}
+            required
           />
           <input 
             type="password" 
@@ -67,24 +67,22 @@ export default function Register() {
             value={form.password}
             onChange={(e) => setForm({...form, password: e.target.value})}
             style={{
-              width: '100%', padding: '1rem', marginBottom: '1.8rem', borderRadius: '6px',
-              border: 'none', backgroundColor: '#333', color: 'white', fontSize: '1rem'
+              width: '100%', padding: '1rem', marginBottom: '2.5rem', borderRadius: '4px',
+              border: '1px solid #222', backgroundColor: '#151515', color: 'white', fontSize: '1rem', outline: 'none'
             }}
+            required
           />
           <button style={{
-            width: '100%', padding: '1rem', borderRadius: '6px', border: 'none',
-            backgroundColor: '#e50914', color: 'white', fontWeight: 'bold', fontSize: '1.1rem',
-            cursor: 'pointer', transition: 'background 0.2s'
-          }}
-          onMouseOver={(e) => e.target.style.backgroundColor = '#f40612'}
-          onMouseOut={(e) => e.target.style.backgroundColor = '#e50914'}
-          >
-            Create Account
+            width: '100%', padding: '1rem', borderRadius: '4px', border: 'none',
+            backgroundColor: '#e50914', color: 'white', fontWeight: 'bold', fontSize: '1rem',
+            cursor: 'pointer', transition: '0.2s', textTransform: 'uppercase', letterSpacing: '1px'
+          }}>
+            Register
           </button>
         </form>
 
-        <p style={{ marginTop: '2rem', color: '#888', textAlign: 'center' }}>
-          Already have an account? <Link href="/login" style={{ color: 'white', textDecoration: 'none' }}>Sign in now.</Link>
+        <p style={{ marginTop: '2.5rem', color: '#666', textAlign: 'center', fontSize: '0.9rem' }}>
+          Already have an account? <Link href="/login" style={{ color: '#fff', textDecoration: 'none', fontWeight: 'bold' }}>Sign in.</Link>
         </p>
       </div>
     </div>

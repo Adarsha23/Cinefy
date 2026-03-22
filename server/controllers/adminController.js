@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// 1. Get Dashboard Summary Stats (Total Movies, Bookings, Revenue)
+// Fetch dashboard stats for admin overview
 const getAdminStats = async (req, res) => {
   try {
     const [movieCount, bookingCount, totalRev] = await Promise.all([
@@ -23,7 +23,7 @@ const getAdminStats = async (req, res) => {
   }
 };
 
-// 2. Get EVERY booking ever made (Master Log)
+// Fetch master log of all bookings
 const getAllBookings = async (req, res) => {
   try {
     const bookings = await prisma.booking.findMany({
@@ -45,7 +45,8 @@ const getAllBookings = async (req, res) => {
   }
 };
 
-// 🏛️ 3. CREATE NEW MOVIE (Admin Only)
+// --- Movie CRUD ---
+
 const createMovie = async (req, res) => {
   try {
     const movie = await prisma.movie.create({ data: req.body });
@@ -55,7 +56,40 @@ const createMovie = async (req, res) => {
   }
 };
 
-// 🏛️ 4. CREATE NEW THEATER (Admin Only)
+const updateMovie = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const movie = await prisma.movie.update({
+      where: { id: parseInt(id) },
+      data: req.body
+    });
+    res.json(movie);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating movie" });
+  }
+};
+
+const deleteMovie = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.movie.delete({ where: { id: parseInt(id) } });
+    res.json({ message: "Movie deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting movie" });
+  }
+};
+
+// --- Theater CRUD ---
+
+const getTheaters = async (req, res) => {
+  try {
+    const theaters = await prisma.theater.findMany();
+    res.json(theaters);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching theaters" });
+  }
+};
+
 const createTheater = async (req, res) => {
   try {
     const theater = await prisma.theater.create({ data: req.body });
@@ -65,7 +99,45 @@ const createTheater = async (req, res) => {
   }
 };
 
-// 🏛️ 5. CREATE NEW SHOWTIME (Admin Only)
+const updateTheater = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const theater = await prisma.theater.update({
+      where: { id: parseInt(id) },
+      data: req.body
+    });
+    res.json(theater);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating theater" });
+  }
+};
+
+const deleteTheater = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.theater.delete({ where: { id: parseInt(id) } });
+    res.json({ message: "Theater deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting theater" });
+  }
+};
+
+// --- Show CRUD ---
+
+const getAllShows = async (req, res) => {
+  try {
+    const shows = await prisma.show.findMany({
+      include: {
+        movie: { select: { title: true } },
+        theater: { select: { name: true } }
+      }
+    });
+    res.json(shows);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching shows" });
+  }
+};
+
 const createShow = async (req, res) => {
   try {
     const show = await prisma.show.create({ data: req.body });
@@ -75,4 +147,32 @@ const createShow = async (req, res) => {
   }
 };
 
-module.exports = { getAdminStats, getAllBookings, createMovie, createTheater, createShow };
+const updateShow = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const show = await prisma.show.update({
+      where: { id: parseInt(id) },
+      data: req.body
+    });
+    res.json(show);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating show" });
+  }
+};
+
+const deleteShow = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.show.delete({ where: { id: parseInt(id) } });
+    res.json({ message: "Show deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting show" });
+  }
+};
+
+module.exports = { 
+  getAdminStats, getAllBookings, 
+  getTheaters, createTheater, updateTheater, deleteTheater,
+  createMovie, updateMovie, deleteMovie,
+  getAllShows, createShow, updateShow, deleteShow
+};

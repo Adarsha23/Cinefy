@@ -80,7 +80,7 @@ const getShowById = async (req, res) => {
       include: { 
         movie: true,   // Show the title/poster
         theater: true, // Show the theater name/location
-        bookings: true //  Include all bookings for this show
+        bookings: true // Include all bookings for this show
       }
     });
     res.json(show);

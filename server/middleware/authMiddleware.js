@@ -1,42 +1,43 @@
-// /server/middleware/authMiddleware.js
-
 const jwt = require('jsonwebtoken');
 
+/**
+ * Access protection middleware
+ * Verifies JWT token from Authorization header (Bearer token)
+ */
 const protect = (req, res, next) => {
   let token;
 
-  // 1. Check if they sent a token in the headers
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
-      // 2. The header format is in two parts, token in second, so we split by space and grab the 2nd part
+      // Extract token from "Bearer <TOKEN>"
       token = req.headers.authorization.split(' ')[1];
 
-      // 3. Verify the token using our secret key
+      // Decode and verify against secret
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // 4. Attach the user's ID and role to the request so the next function can use it!
+      // Attach user payload (id, role, etc) to request
       req.user = decoded;
-
-      // 5. Let them pass to the actual route!
-      next();
+      return next();
     } catch (error) {
-      console.error(error);
-      res.status(401).json({ message: "Not authorized. Token failed." });
+      console.error("JWT Verification Failure:", error.message);
+      return res.status(401).json({ message: "Invalid or expired token" });
     }
   }
 
-  // If no token was sent at all
   if (!token) {
-    res.status(401).json({ message: "Not authorized. No token provided." });
+    return res.status(401).json({ message: "Authentication required" });
   }
 };
 
-// 🏛️ ADMIN ONLY MIDDLEWARE
+/**
+ * Role-based authorization middleware
+ * Ensures the authenticated user has ADMIN privileges
+ */
 const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === 'ADMIN') {
     next();
   } else {
-    res.status(403).json({ message: "Forbidden - Admin access required" });
+    res.status(403).json({ message: "Forbidden: Admin access required" });
   }
 };
 

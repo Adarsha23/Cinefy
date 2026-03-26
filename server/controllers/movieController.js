@@ -2,11 +2,31 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// 1. Get all movies
+// 1. Get all movies with pagination
 const getMovies = async (req, res) => {
   try {
-    const movies = await prisma.movie.findMany();
-    res.json(movies);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const [movies, total] = await Promise.all([
+      prisma.movie.findMany({
+        skip,
+        take: limit,
+        orderBy: { releaseDate: 'desc' }
+      }),
+      prisma.movie.count()
+    ]);
+
+    res.json({
+      movies,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: "Error fetching movies" });
   }

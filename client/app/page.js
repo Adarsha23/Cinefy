@@ -5,20 +5,23 @@ import MovieCard from './components/MovieCard';
 
 export default function Home() {
   const [movies, setMovies] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, pages: 1 });
   const [loading, setLoading] = useState(true);
 
-  // Initialize data on component mount
+  const fetchMovies = async (page = 1) => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/movies?page=${page}&limit=8`);
+      setMovies(response.data.movies);
+      setPagination(response.data.pagination);
+    } catch (error) {
+      console.error("Data Fetch Error:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        const response = await api.get('/movies');
-        setMovies(response.data);
-      } catch (error) {
-        console.error("Data Fetch Error:", error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchMovies();
   }, []);
 
@@ -33,15 +36,47 @@ export default function Home() {
           <p style={{ color: '#444', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '2px' }}>Catalog empty. Please contact administration.</p>
         </div>
       ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '3rem'
-        }}>
-          {movies.map(movie => (
-            <MovieCard key={movie.id} movie={movie} />
-          ))}
-        </div>
+        <>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '3rem',
+            marginBottom: '4rem'
+          }}>
+            {movies.map(movie => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          {pagination.pages > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
+              <button 
+                onClick={() => fetchMovies(pagination.page - 1)}
+                disabled={pagination.page === 1}
+                style={{
+                  padding: '10px 20px', backgroundColor: '#111', color: pagination.page === 1 ? '#333' : '#fff', 
+                  border: '1px solid #222', cursor: pagination.page === 1 ? 'not-allowed' : 'pointer', fontWeight: 'bold'
+                }}
+              >
+                Previous
+              </button>
+              <div style={{ display: 'flex', alignItems: 'center', color: '#fff', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                PAGE {pagination.page} OF {pagination.pages}
+              </div>
+              <button 
+                onClick={() => fetchMovies(pagination.page + 1)}
+                disabled={pagination.page === pagination.pages}
+                style={{
+                  padding: '10px 20px', backgroundColor: '#111', color: pagination.page === pagination.pages ? '#333' : '#fff', 
+                  border: '1px solid #222', cursor: pagination.page === pagination.pages ? 'not-allowed' : 'pointer', fontWeight: 'bold'
+                }}
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

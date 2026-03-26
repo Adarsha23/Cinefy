@@ -1,6 +1,7 @@
 'use client';
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import api from '../../lib/axios';
 
 const AuthContext = createContext();
 
@@ -33,7 +34,10 @@ export function AuthProvider({ children }) {
     setUser(userData);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (_) {}
     localStorage.clear();
     setIsLoggedIn(false);
     setUser(null);

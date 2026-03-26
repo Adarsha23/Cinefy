@@ -5,9 +5,17 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import Link from 'next/link';
 
+import { z } from 'zod';
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required")
+});
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({});
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -15,14 +23,28 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErrors({});
+
     try {
+      // 1. Zod Validation
+      loginSchema.parse({ email, password });
+
+      // 2. API Call
       const response = await api.post('/auth/login', { email, password });
       login(response.data.token, response.data.user); 
       
       // Navigate to callback or default to home
       router.push(callback || '/');
     } catch (err) {
-      alert(err.response?.data?.message || "Authentication failed");
+      if (err instanceof z.ZodError) {
+        const formattedErrors = {};
+        err.errors.forEach(error => {
+          formattedErrors[error.path[0]] = error.message;
+        });
+        setErrors(formattedErrors);
+      } else {
+        alert(err.response?.data?.message || "Authentication failed");
+      }
     }
   };
 
@@ -48,17 +70,18 @@ export default function Login() {
         <form onSubmit={handleLogin}>
           <div style={{ marginBottom: '1.2rem' }}>
             <input 
-              type="email" 
+              type="text" 
               placeholder="Email address" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
               style={{
                 width: '100%', padding: '1rem', borderRadius: '4px',
-                border: '1px solid #222', backgroundColor: '#151515', color: 'white', fontSize: '1rem',
+                border: errors.email ? '1px solid #e50914' : '1px solid #222', 
+                backgroundColor: '#151515', color: 'white', fontSize: '1rem',
                 outline: 'none', boxSizing: 'border-box'
               }}
             />
+            {errors.email && <p style={{ color: '#e50914', fontSize: '0.75rem', marginTop: '5px' }}>{errors.email}</p>}
           </div>
           <div style={{ marginBottom: '2.5rem' }}>
             <input 
@@ -66,13 +89,14 @@ export default function Login() {
               placeholder="Password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
               style={{
                 width: '100%', padding: '1rem', borderRadius: '4px',
-                border: '1px solid #222', backgroundColor: '#151515', color: 'white', fontSize: '1rem',
+                border: errors.password ? '1px solid #e50914' : '1px solid #222', 
+                backgroundColor: '#151515', color: 'white', fontSize: '1rem',
                 outline: 'none', boxSizing: 'border-box'
               }}
             />
+            {errors.password && <p style={{ color: '#e50914', fontSize: '0.75rem', marginTop: '5px' }}>{errors.password}</p>}
           </div>
           <button style={{
             width: '100%', padding: '1rem', borderRadius: '4px', border: 'none',

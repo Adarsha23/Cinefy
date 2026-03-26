@@ -44,47 +44,79 @@ const registerUser = async (req, res) => {
 };
 const jwt = require('jsonwebtoken');
 
+// Helper to generate tokens
+const generateTokens = (user) => {
+  const accessToken = jwt.sign(
+    { id: user.id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '15m' } // Short-lived
+  );
+
+  const refreshToken = jwt.sign(
+    { id: user.id },
+    process.env.REFRESH_SECRET || "fallback_refresh_secret",
+    { expiresIn: '7d' } // Long-lived
+  );
+
+  return { accessToken, refreshToken };
+};
+
 // The Login Function
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
 
-    // 1. Find the user in the database
-    const user = await prisma.user.findUnique({
-      where: { email }
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const { accessToken, refreshToken } = generateTokens(user);
+
+    // Set refreshToken in secure HttpOnly cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
-    if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    // 2. Check if the password matches the hash!
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    // 3. Create the JWT
-    // We put their 'id' and 'role' inside the token so we know who they are later
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-
-    // 4. Send the token back to the frontend
     res.json({
       message: "Login successful!",
-      token: token,
+      token: accessToken, // Frontend uses accessToken for authorization
       user: { id: user.id, name: user.name, email: user.email, role: user.role }
     });
-
   } catch (error) {
-    console.error("Error in login: ", error);
+    console.error("Login Check Error:", error);
     res.status(500).json({ message: "Server error during login" });
   }
 };
 
+// Refresh Token Handler
+const refreshToken = async (req, res) => {
+  try {
+    const rfToken = req.cookies.refreshToken;
+    if (!rfToken) return res.status(401).json({ message: "No refresh token" });
 
-module.exports = { registerUser, loginUser };
+    const decoded = jwt.verify(rfToken, process.env.REFRESH_SECRET || "fallback_refresh_secret");
+    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+
+    if (!user) return res.status(401).json({ message: "User not found" });
+
+    const { accessToken } = generateTokens(user);
+    res.json({ token: accessToken });
+  } catch (error) {
+    res.status(401).json({ message: "Invalid refresh token" });
+  }
+};
+
+const logoutUser = async (req, res) => {
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
+  res.json({ message: "Logout successful" });
+};
+
+module.exports = { registerUser, loginUser, refreshToken, logoutUser };

@@ -68,7 +68,12 @@ export default function BookingPage() {
       alert("Booking confirmed successfully.");
       router.push('/bookings');
     } catch (err) {
-      alert("Authentication required for booking.");
+      if (err.response?.status === 401) {
+        // Automatically redirect to login with callback URL to return after authentication
+        router.push(`/login?callback=/booking/${showId}`);
+      } else {
+        alert(err.response?.data?.message || "Booking failed.");
+      }
     }
   };
 

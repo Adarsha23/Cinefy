@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import api from '@/lib/axios';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import Link from 'next/link';
 
@@ -10,13 +10,17 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callback = searchParams.get('callback');
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const response = await api.post('/auth/login', { email, password });
       login(response.data.token, response.data.user); 
-      router.push('/');
+      
+      // Navigate to callback or default to home
+      router.push(callback || '/');
     } catch (err) {
       alert(err.response?.data?.message || "Authentication failed");
     }

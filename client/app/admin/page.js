@@ -129,6 +129,22 @@ export default function AdminDashboard() {
     } catch (err) { alert("Deletion Failed"); }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      const response = await api.get('/admin/reports/bookings', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `cinefy_report_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Failed to generate report.");
+    }
+  };
+
   if (loading) return <div style={{ color: '#888', textAlign: 'center', marginTop: '15%' }}>Loading Admin Utilities...</div>;
 
   return (
@@ -148,7 +164,21 @@ export default function AdminDashboard() {
         
         {activeTab === 'overview' && (
           <div style={{ maxWidth: '1200px' }}>
-            <h2 style={sectionTitleStyle}>Operations Overview</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+              <h2 style={sectionTitleStyle}>Operations Overview</h2>
+              <button
+                onClick={handleExportCSV}
+                style={{
+                  backgroundColor: 'transparent', color: '#e50914', border: '1px solid #e50914',
+                  padding: '0.7rem 1.5rem', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.8rem',
+                  cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '1px', transition: '0.2s'
+                }}
+                onMouseEnter={e => { e.target.style.backgroundColor = '#e50914'; e.target.style.color = '#fff'; }}
+                onMouseLeave={e => { e.target.style.backgroundColor = 'transparent'; e.target.style.color = '#e50914'; }}
+              >
+                Download Report (.csv)
+              </button>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '4rem' }}>
               <div style={statBoxStyle}><span style={statLabelStyle}>TOTAL MOVIES</span><div style={statValStyle}>{stats.movies}</div></div>
               <div style={statBoxStyle}><span style={statLabelStyle}>TICKETS PURCHASED</span><div style={statValStyle}>{stats.bookings}</div></div>

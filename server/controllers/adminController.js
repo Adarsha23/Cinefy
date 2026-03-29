@@ -170,8 +170,56 @@ const deleteShow = async (req, res) => {
   }
 };
 
+// Generate and stream full booking report as CSV
+const exportBookingReport = async (req, res) => {
+  try {
+    const bookings = await prisma.booking.findMany({
+      include: {
+        user: { select: { name: true, email: true } },
+        show: {
+          include: {
+            movie: { select: { title: true } },
+            theater: { select: { name: true } }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // Build CSV headers
+    const headers = ['BookingID', 'Date', 'Customer', 'Email', 'Movie', 'Theater', 'ShowTime', 'Seats', 'TotalAmount(NPR)', 'Status'];
+    
+    // Build CSV rows
+    const rows = bookings.map(b => [
+      b.id,
+      new Date(b.createdAt).toLocaleDateString('en-GB'),
+      b.user.name,
+      b.user.email,
+      b.show.movie.title,
+      b.show.theater.name,
+      new Date(b.show.startTime).toLocaleString('en-GB'),
+      b.seats.join(' | '),
+      b.totalPrice,
+      b.status
+    ]);
+
+    // Combine into CSV string
+    const csv = [headers, ...rows]
+      .map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    res.header('Content-Type', 'text/csv');
+    res.attachment(`cinefy_report_${new Date().toISOString().split('T')[0]}.csv`);
+    res.send(csv);
+
+  } catch (error) {
+    console.error("CSV Export Error:", error);
+    res.status(500).json({ message: "Failed to generate report" });
+  }
+};
+
 module.exports = { 
-  getAdminStats, getAllBookings, 
+  getAdminStats, getAllBookings, exportBookingReport,
   getTheaters, createTheater, updateTheater, deleteTheater,
   createMovie, updateMovie, deleteMovie,
   getAllShows, createShow, updateShow, deleteShow

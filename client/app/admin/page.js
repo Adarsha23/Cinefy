@@ -51,13 +51,13 @@ export default function AdminDashboard() {
     }
   }, [authLoading, isLoggedIn, user, router]);
 
-  // Handle movie submission (Create/Update)
   const submitMovie = async (e) => {
     e.preventDefault();
     try {
-      const payload = { ...movieForm, duration: parseInt(movieForm.duration), releaseDate: new Date(movieForm.releaseDate) };
-      if (movieForm.id) {
-        await api.put(`/admin/movies/${movieForm.id}`, payload);
+      const { id, ...rest } = movieForm;
+      const payload = { ...rest, duration: parseInt(rest.duration), releaseDate: new Date(rest.releaseDate) };
+      if (id) {
+        await api.put(`/admin/movies/${id}`, payload);
         alert("Movie Updated");
       } else {
         await api.post('/admin/movies', payload);
@@ -75,13 +75,13 @@ export default function AdminDashboard() {
     } catch (err) { alert("Deletion Failed"); }
   };
 
-  // Handle theater submission (Create/Update)
   const submitTheater = async (e) => {
     e.preventDefault();
     try {
-      const payload = { ...theaterForm, totalHalls: parseInt(theaterForm.totalHalls) };
-      if (theaterForm.id) {
-        await api.put(`/admin/theaters/${theaterForm.id}`, payload);
+      const { id, ...rest } = theaterForm;
+      const payload = { ...rest, totalHalls: parseInt(rest.totalHalls) };
+      if (id) {
+        await api.put(`/admin/theaters/${id}`, payload);
         alert("Theater Updated");
       } else {
         await api.post('/admin/theaters', payload);
@@ -99,19 +99,19 @@ export default function AdminDashboard() {
     } catch (err) { alert("Deletion Failed"); }
   };
 
-  // Handle show submission (Create/Update)
   const submitShow = async (e) => {
     e.preventDefault();
     try {
+      const { id, ...rest } = showForm;
       const payload = { 
-        ...showForm, 
-        movieId: parseInt(showForm.movieId), 
-        theaterId: parseInt(showForm.theaterId),
-        ticketPrice: parseFloat(showForm.ticketPrice),
-        startTime: new Date(showForm.startTime).toISOString()
+        ...rest, 
+        movieId: parseInt(rest.movieId), 
+        theaterId: parseInt(rest.theaterId),
+        ticketPrice: parseFloat(rest.ticketPrice),
+        startTime: new Date(rest.startTime).toISOString()
       };
-      if (showForm.id) {
-        await api.put(`/admin/shows/${showForm.id}`, payload);
+      if (id) {
+        await api.put(`/admin/shows/${id}`, payload);
         alert("Show Updated");
       } else {
         await api.post('/admin/shows', payload);

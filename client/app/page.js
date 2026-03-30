@@ -12,7 +12,7 @@ export default function Home() {
     setLoading(true);
     try {
       const response = await api.get(`/movies?page=${page}&limit=8`);
-      setMovies(response.data.movies);
+      setMovies(response.data.movies || []);
       setPagination(response.data.pagination);
     } catch (error) {
       console.error("Data Fetch Error:", error.message);

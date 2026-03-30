@@ -33,7 +33,7 @@ export default function AdminDashboard() {
         ]);
         setStats(statsRes.data);
         setBookings(bookingsRes.data);
-        setMovies(moviesRes.data);
+        setMovies(moviesRes.data.movies || []);
         setTheaters(theatersRes.data);
         setShows(showsRes.data);
       } catch (err) {

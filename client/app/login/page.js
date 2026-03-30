@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import api from '@/lib/axios';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
@@ -12,7 +12,7 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required")
 });
 
-export default function Login() {
+function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
@@ -114,5 +114,13 @@ export default function Login() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div style={{ color: 'white', textAlign: 'center', marginTop: '20vh' }}>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

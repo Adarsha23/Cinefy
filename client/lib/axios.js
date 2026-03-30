@@ -26,7 +26,7 @@ api.interceptors.response.use(
     const { status } = error.response || {};
     
     // Catch 401 for token expiry and auto-refresh
-    if (status === 401 && !originalRequest._retry) {
+    if (status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/refresh') {
       originalRequest._retry = true;
       try {
         const res = await api.post('/auth/refresh', {}, { withCredentials: true });
